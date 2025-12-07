@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GENDPART: Стратегия Замещения Трафика (Vaden)</title>
+    <style>
+        :root {
+            --bg-body: #0b0c10;
+            --bg-panel: #1f2833;
+            --bg-card: #15191f;
+            --text-primary: #c5c6c7;
+            --text-header: #66fcf1;
+            --accent-gold: #d4af37;
+            --accent-red: #ff4d4d;
+            --border-color: #2d3436;
+            --spacing-unit: 20px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            line-height: 1.7;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--spacing-unit);
+        }
+
+        /* TYPOGRAPHY */
+        h1, h2, h3, h4 { color: #fff; margin-bottom: 1rem; font-weight: 700; }
+        h1 { font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px; border-bottom: 2px solid var(--text-header); padding-bottom: 20px; margin-top: 40px; }
+        h2 { font-size: 1.8rem; color: var(--text-header); margin-top: 50px; border-left: 5px solid var(--text-header); padding-left: 15px; }
+        h3 { font-size: 1.3rem; color: var(--accent-gold); margin-top: 20px; }
+        
+        strong { color: #fff; }
+
+        /* HEADER */
+        header {
+            background: linear-gradient(180deg, #121418 0%, #0b0c10 100%);
+            padding: 40px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .meta-info {
+            display: flex;
+            gap: 30px;
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+
+        /* GRID SYSTEM */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; }
+
+        /* PANELS */
+        .panel {
+            background-color: var(--bg-panel);
+            padding: 30px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .step-badge {
+            position: absolute;
+            top: -15px;
+            left: 20px;
+            background: var(--text-header);
+            color: #000;
+            padding: 5px 15px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            box-shadow: 0 5px 15px rgba(102, 252, 241, 0.3);
+        }
+
+        /* LISTS */
+        ul.tech-list { list-style: none; }
+        ul.tech-list li {
+            margin-bottom: 15px;
+            padding-left: 25px;
+            position: relative;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            padding-bottom: 10px;
+        }
+        ul.tech-list li::before {
+            content: "▹";
+            color: var(--text-header);
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        /* SCRIPT BOX */
+        .script-box {
+            background: #15191f;
+            border-left: 3px solid var(--accent-gold);
+            padding: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.95rem;
+            color: #e0e0e0;
+        }
+        .script-label {
+            display: block;
+            font-size: 0.7rem;
+            color: var(--accent-gold);
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+
+        /* PLATFORM CARDS */
+        .platform-card {
+            background: var(--bg-card);
+            padding: 20px;
+            border-top: 3px solid #444;
+            transition: 0.3s;
+        }
+        .platform-card:hover { border-top-color: var(--text-header); transform: translateY(-5px); }
+        .p-title { font-size: 1.2rem; font-weight: bold; color: #fff; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+        .p-badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 3px; background: #333; color: #aaa; }
+
+        /* RISK SECTION */
+        .risk-section {
+            background: rgba(255, 77, 77, 0.05);
+            border: 1px solid var(--accent-red);
+        }
+        .risk-title { color: var(--accent-red); display: flex; align-items: center; gap: 10px; }
+
+        /* SUBTLE FOOTER NOTE */
+        .system-note {
+            margin-top: 80px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+            color: #444;
+            font-size: 0.8rem;
+            font-family: monospace;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            h1 { font-size: 1.8rem; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <div class="container">
+        <div class="meta-info">
+            <span>Confidential Strategy</span>
+            <span>Project: Vaden -> Gendpart</span>
+        </div>
+        <h1>Операционный План Запуска</h1>
+        <p style="max-width: 800px; color: #888;">
+            Детальная дорожная карта по агрессивному захвату доли рынка через подмену спроса. 
+            Включает технические спецификации, скрипты продаж и управление рисками.
+        </p>
+    </div>
+</header>
+
+<main class="container">
+
+    <!-- PHASE 1 -->
+    <section>
+        <h2>ФАЗА 1: Архитектура Данных (Фундамент)</h2>
+        <p style="margin-bottom: 20px;">Прежде чем запускать трафик, необходимо подготовить "ловушку" на уровне базы данных.</p>
+        
+        <div class="grid-2">
+            <div class="panel">
+                <div class="step-badge">ШАГ 01</div>
+                <h3>Синхронизация Номенклатуры</h3>
+                <ul class="tech-list">
+                    <li><strong>Кросс-коды (Cross-Reference):</strong> Создать таблицу соответствия `Артикул Vaden` = `Артикул Gendpart`. Критически важно для авто-подстановки аналогов.</li>
+                    <li><strong>Атрибуты товара:</strong> В карточках Gendpart прописать: "Полный аналог Vaden [Артикул]", "Взаимозаменяем с [Артикул]".</li>
+                    <li><strong>Визуальное доказательство:</strong> Фото "На весах". Слева Vaden, справа Gendpart. Вес одинаковый = качество материалов одинаковое.</li>
+                </ul>
+            </div>
+            <div class="panel">
+                <div class="step-badge">ШАГ 02</div>
+                <h3>Управление Фидами (XML/YML)</h3>
+                <ul class="tech-list">
+                    <li><strong>Фид А (Приманка):</strong> Выгружаем Vaden. Цену ставим +15% от рынка или статус "Под заказ 5 дней".</li>
+                    <li><strong>Фид Б (Продажа):</strong> Выгружаем Gendpart. Статус "В наличии", цена -20% от Vaden, пометка "Отгрузка сегодня".</li>
+                    <li><strong>Автоматизация:</strong> Обновление остатков каждые 60 минут. Ошибка в наличии на Avto.pro = пессимизация аккаунта.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- PHASE 2 -->
+    <section>
+        <h2>ФАЗА 2: Экосистема Площадок</h2>
+        <p style="margin-bottom: 20px;">Каналы трафика для целевой аудитории (механики, снабженцы АТП, частники).</p>
+
+        <div class="grid-3">
+            <!-- AVTO.PRO -->
+            <div class="platform-card">
+                <div class="p-title">Avto.pro <span class="p-badge" style="color: #ff4d4d">ВЫСОКИЙ РИСК</span></div>
+                <p style="font-size: 0.9rem; margin-bottom: 15px;">Самая жесткая, но самая конверсионная площадка.</p>
+                <ul class="tech-list" style="font-size: 0.85rem;">
+                    <li><strong>Стратегия:</strong> Не врать про наличие Vaden. Если нет — не выгружаем.</li>
+                    <li><strong>Хак:</strong> Покупаем рекламное место в выдаче по запросу Vaden (функция "Реклама аналогов").</li>
+                    <li><strong>Внимание:</strong> Нужен идеальный рейтинг отмен.</li>
+                </ul>
+            </div>
+
+            <!-- PROM.UA -->
+            <div class="platform-card">
+                <div class="p-title">Prom.ua <span class="p-badge" style="color: #66fcf1">МАССОВЫЙ</span></div>
+                <p style="font-size: 0.9rem; margin-bottom: 15px;">Работает для частников и мелких СТО.</p>
+                <ul class="tech-list" style="font-size: 0.85rem;">
+                    <li><strong>Стратегия:</strong> CPA модель (оплата за заказ).</li>
+                    <li><strong>SEO-спам:</strong> В названии товара Gendpart пишем: "Ремкомплект крана (аналог Vaden 12345)".</li>
+                    <li><strong>Отзывы:</strong> Накрутить первые 10 отзывов с фото упаковки.</li>
+                </ul>
+            </div>
+
+            <!-- LARDI / ATI -->
+            <div class="platform-card">
+                <div class="p-title">Lardi-Trans / ATI <span class="p-badge" style="color: var(--accent-gold)">ПРОФИ</span></div>
+                <p style="font-size: 0.9rem; margin-bottom: 15px;">Здесь сидят владельцы автопарков.</p>
+                <ul class="tech-list" style="font-size: 0.85rem;">
+                    <li><strong>Форумы:</strong> Нативная реклама. Тема: "Кто ставил пневматику Gendpart?". Ответы ботов: "Ставил, полет нормальный".</li>
+                    <li><strong>Раздел "Запчасти":</strong> Платное размещение оптового прайса.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="grid-3" style="margin-top: 25px;">
+            <!-- VIBER/TELEGRAM -->
+            <div class="platform-card">
+                <div class="p-title">Viber/Telegram Группы</div>
+                <p style="font-size: 0.9rem; margin-bottom: 10px;">Сообщества дальнобойщиков.</p>
+                <ul class="tech-list" style="font-size: 0.85rem;">
+                    <li>Посев видео "Как я перебрал кран" (в кадре коробка Gendpart).</li>
+                    <li>Прямой контакт с механиками, предложение бонуса на карту за установку бренда.</li>
+                </ul>
+            </div>
+            
+            <!-- GOOGLE MERCHANT -->
+            <div class="platform-card">
+                <div class="p-title">Google Shopping</div>
+                <p style="font-size: 0.9rem; margin-bottom: 10px;">Трафик по артикулам.</p>
+                <ul class="tech-list" style="font-size: 0.85rem;">
+                    <li>Настройка кампании строго по артикулам Vaden.</li>
+                    <li>В объявлении сразу показывать цену Gendpart для CTR.</li>
+                </ul>
+            </div>
+
+            <!-- OLX -->
+            <div class="platform-card">
+                <div class="p-title">OLX (Бизнес)</div>
+                <p style="font-size: 0.9rem; margin-bottom: 10px;">Для срочных ремонтов на трассе.</p>
+                <ul class="tech-list" style="font-size: 0.85rem;">
+                    <li>Заголовки: "Кран уровня пола Vaden / Gendpart".</li>
+                    <li>Указывать возможность отправки автобусом день-в-день.</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- PHASE 3 -->
+    <section>
+        <h2>ФАЗА 3: Скрипты и Работа с Возражениями</h2>
+        <div class="grid-2">
+            <div>
+                <p style="margin-bottom: 15px;">Менеджер — это фильтр. Он должен сказать не "Нет", а "Есть вариант лучше".</p>
+                <div class="script-box">
+                    <span class="script-label">Сценарий: Клиент просит Vaden</span>
+                    <p>— Добрый день, нужен кран [Артикул Vaden].</p>
+                    <p style="color: #aaa;">— Да, вижу. Vaden сейчас под заказ, цена [Высокая], ждать 4 дня. <br>
+                    Но смотрите, у меня на выдаче лежит <strong>Gendpart</strong>. Завод тот же, упаковка другая. Я вам сейчас фото в Вайбер скину, там литье один в один. И цена на 2000 грн дешевле. Отправлю сегодня. Ставим?</p>
+                </div>
+            </div>
+            <div>
+                <h3 style="margin-top: 0;">Ключевые триггеры доверия:</h3>
+                <ul class="tech-list">
+                    <li><strong>"Я сам держал в руках":</strong> Менеджер звучит как эксперт, а не продавец.</li>
+                    <li><strong>"Гарантия":</strong> Даем 12 месяцев на Gendpart (против 6 у Vaden). Снимает страх "китая".</li>
+                    <li><strong>"Тестовый образец":</strong> Для АТП — "Возьмите один, если не понравится — вернем деньги".</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- RISKS -->
+    <section class="panel risk-section">
+        <h2 class="risk-title" style="margin-top: 0; border: none; padding: 0;">
+            <span>⚠️</span> КАРТА РИСКОВ И ПРЕДОСТЕРЕЖЕНИЯ
+        </h2>
+        <div class="grid-2" style="margin-top: 20px;">
+            <div>
+                <h4 style="color: var(--accent-red);">Технический БАН</h4>
+                <p style="font-size: 0.9rem; color: #ccc;">
+                    Самая частая ошибка — "грязный фид". Если на Avto.pro выгрузить Vaden как "В наличии", а по факту его нет — вы получите метку "Ненадежный продавец".
+                    <br><strong>Решение:</strong> Использовать парсер остатков и обновлять склад по API раз в час.
+                </p>
+            </div>
+            <div>
+                <h4 style="color: var(--accent-red);">Возвраты и Рекламации</h4>
+                <p style="font-size: 0.9rem; color: #ccc;">
+                    Пневматика — сложный узел. Часто проблема не в детали, а в системе авто.
+                    <br><strong>Решение:</strong> Вложить в коробку инструкцию-памятку "Как правильно ставить". Это снизит возвраты на 30%.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SUBTLE SYSTEM NOTE -->
+    <div class="system-note">
+        <strong>SYSTEM NOTE:</strong> Корректная настройка связки 1C ⇄ Маркетплейсы требует строгого контроля чистоты XML-фидов и логики подмены. Рекомендуется технический надзор на этапе запуска для предотвращения блокировок аккаунтов.
+    </div>
+
+</main>
+
+<footer style="text-align: center; padding: 40px; color: #333; font-size: 0.75rem; margin-top: 20px;">
+    <p>INTERNAL USE ONLY. DO NOT DISTRIBUTE.</p>
+</footer>
+
+</body>
+</html>
